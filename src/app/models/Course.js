@@ -1,12 +1,40 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
+
 const Schema = mongoose.Schema;
 
-const Course = new Schema({
-    name: { type: String, default: 'Not name;', maxlength: 255 },
-    description: { type: String, default: 'Not description;', maxlength: 600 },
+const CourseSchema = new Schema({
+    name: { type: String, default: 'Not name', maxlength: 255, required: true },
+    description: { type: String, default: 'Not description', maxlength: 600 },
     image: { type: String, default: 'Not image', maxlength: 255 },
-    createAt: { type: Date, defauth: Date.now },
-    upateAt: { type: Date, defauth: Date.now },
+    videoId: { type: String, default: 'Not video', maxlength: 255 },
+    slug: { type: String, unique: true },
+    level: { type: String, default: 'Not level', maxlength: 255 },
+    totalLesson: { type: String, default: 'Not totalLesson', maxlength: 255 },
+    totalTime: { type: String, default: 'Not totalTime', maxlength: 255 },
+}, {
+    timestamps: true,
 });
 
-module.exports = mongoose.model('Course', Course);
+// Tạo slug trước khi lưu nếu chưa có
+CourseSchema.pre('save', async function (next) {
+    if (!this.slug) {
+        let baseSlug = slugify(this.name, { lower: true, strict: true });
+        let slug = baseSlug;
+        let counter = 1;
+
+        const Course = mongoose.model('Course', CourseSchema);
+
+        // Lặp đến khi không trùng
+        while (await Course.findOne({ slug })) {
+            slug = `${baseSlug}-${counter++}`;
+        }
+
+        this.slug = slug;
+    }
+
+    next();
+});
+
+
+module.exports = mongoose.model('Course', CourseSchema);
