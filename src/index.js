@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
+const methodOverride = require('method-override')
 const { engine } = require('express-handlebars');
 
 const app = express();
@@ -17,11 +18,15 @@ app.use(express.urlencoded({
     extended: true
 })); // chính là middleware để xử lý dữ liệu trung gian
 app.use(express.json()); // chính là middleware để xử lý dữ liệu trung gian
+app.use(methodOverride('_method'))
 //http logger
 // app.use(morgan('combined'));
 //template engine
 app.engine('hbs', engine({
-    extname: '.hbs'
+    extname: '.hbs',
+    helpers: {
+        sum: (a, b) => a + b,
+    }
 }));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources', 'views'));
