@@ -20,7 +20,7 @@ app.use(express.urlencoded({
 app.use(express.json()); // chính là middleware để xử lý dữ liệu trung gian
 app.use(methodOverride('_method'))
 //http logger
-// app.use(morgan('combined'));
+app.use(morgan('combined'));
 //template engine
 app.engine('hbs', engine({
     extname: '.hbs',
