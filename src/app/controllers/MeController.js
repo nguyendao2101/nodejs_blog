@@ -3,9 +3,16 @@ const { multipleMongooseToObject } = require('../../util/mongoose');
 
 class MeController {
     storedCourses(req, res, next) {
-        Course.find({})
-            .then((courses) => {
+        Promise.all([
+            Course.find({}),
+            Course.findDeleted() // Tìm tất cả các khóa học đã bị xóa
+        ])
+            .then(([courses, deletedCourses]) => {
+                // Lọc các khóa học có trạng thái deleted === true
+                const filteredDeletedCourses = deletedCourses.filter(course => course.deleted === true);
+
                 res.render('me/stored-courses', {
+                    deletedCount: filteredDeletedCourses.length, // Đếm số lượng khóa học bị xóa
                     courses: multipleMongooseToObject(courses),
                 });
             })
