@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const mongooseDelete = require('mongoose-delete');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const Schema = mongoose.Schema;
 
 const CourseSchema = new Schema({
+    _id: { type: Number },
     name: { type: String, default: 'Not name', maxlength: 255, required: true },
     description: { type: String, default: 'Not description', maxlength: 600 },
     image: { type: String, default: 'Not image', maxlength: 255 },
@@ -14,6 +16,7 @@ const CourseSchema = new Schema({
     totalLesson: { type: String, default: 'Not totalLesson', maxlength: 255 },
     totalTime: { type: String, default: 'Not totalTime', maxlength: 255 },
 }, {
+    _id: false,
     timestamps: true,
 });
 
@@ -50,6 +53,6 @@ CourseSchema.query.sortable = function (req) {
 
 // add plugin
 CourseSchema.plugin(mongooseDelete, { overrideMethods: 'all', deletedAt: true });
-
+CourseSchema.plugin(AutoIncrement);
 
 module.exports = mongoose.model('Course', CourseSchema);
