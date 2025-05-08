@@ -31,27 +31,7 @@ app.use(SortMiddleware);
 //template engine
 app.engine('hbs', engine({
     extname: '.hbs',
-    helpers: {
-        sum: (a, b) => a + b,
-        sortable: (field, sort) => {
-            const sortType = field === sort.column ? sort.type : 'default';
-            const icons = {
-                default: 'oi oi-elevator',
-                asc: 'oi oi-sort-ascending',
-                desc: 'oi oi-sort-descending',
-            }
-            const types = {
-                default: 'desc',
-                asc: 'desc',
-                desc: 'asc',
-            }
-            const icon = icons[sortType] || icons.default;
-            const type = types[sortType] || types.default;
-            return `<a href="?_sort&column=${field}&type=${type}">
-                <span class="${icon}"></span>
-            </a>`;
-        }
-    }
+    helpers: require('./helpers/handlebars'),
 }));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources', 'views'));

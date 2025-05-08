@@ -37,6 +37,17 @@ CourseSchema.pre('save', async function (next) {
     next();
 });
 
+//Custom query helpers
+CourseSchema.query.sortable = function (req) {
+    if ('_sort' in req.query) {
+        const isVlalidType = ['asc', 'desc'].includes(req.query.type);
+        return this.sort({
+            [req.query.column]: isVlalidType ? req.query.type : 'desc',
+        });
+    }
+    return this;
+}
+
 // add plugin
 CourseSchema.plugin(mongooseDelete, { overrideMethods: 'all', deletedAt: true });
 

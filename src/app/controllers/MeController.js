@@ -5,15 +5,8 @@ class MeController {
 
     //GET, /me/stored/courses
     storedCourses(req, res, next) {
-        let coursesQuery = Course.find({});
-        if ('_sort' in req.query) {
-            coursesQuery = coursesQuery.sort({
-                [req.query.column]: req.query.type,
-
-            });
-        }
         Promise.all([
-            coursesQuery,
+            Course.find({}).sortable(req), // Tìm tất cả các khóa học
             Course.findDeleted() // Tìm tất cả các khóa học đã bị xóa
         ])
             .then(([courses, deletedCourses]) => {
