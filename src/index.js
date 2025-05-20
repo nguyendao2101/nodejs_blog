@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const methodOverride = require('method-override')
 const { engine } = require('express-handlebars');
+const redis = require('./config/db/redis');
 
 const app = express();
 const port = 3000;
@@ -35,6 +36,23 @@ app.engine('hbs', engine({
 }));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources', 'views'));
+
+// Kiểm tra kết nối Redis
+redis.set('testKey', 'testValue', (err) => {
+    if (err) {
+        console.error('Error setting key in Redis:', err);
+    } else {
+        console.log('Key set successfully in Redis');
+    }
+});
+
+redis.get('testKey', (err, value) => {
+    if (err) {
+        console.error('Error getting key from Redis:', err);
+    } else {
+        console.log('Value fetched from Redis:', value);
+    }
+});
 
 //routes init
 route(app);

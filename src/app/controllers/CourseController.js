@@ -1,14 +1,33 @@
 const Course = require('../models/Course');
+const redis = require('../../config/db/redis'); // Import Redis client
 const { mongooseToObject } = require('../../util/mongoose');
 
 class CourseController {
     //GET, /courses/:slug
     show(req, res, next) {
-        Course.findOne({ slug: req.params.slug })
-            .then((course) => {
-                res.render('courses/show', { course: mongooseToObject(course) });
-            })
-            .catch(next);
+        const cacheKey = `course:${req.params.slug}`;
+
+        redis.get(cacheKey, (err, cachedData) => {
+            if (err) return next(err);
+
+            if (cachedData) {
+                return res.render('courses/show', {
+                    course: JSON.parse(cachedData),
+                });
+            }
+
+            Course.findOne({ slug: req.params.slug })
+                .then((course) => {
+                    redis.setex(cacheKey, 60, JSON.stringify(course), (err) => {
+                        if (err) console.error('Error saving to Redis:', err);
+                    });
+
+                    res.render('courses/show', {
+                        course: mongooseToObject(course),
+                    });
+                })
+                .catch(next);
+        });
     }
 
     //GET, /courses/create
@@ -23,7 +42,10 @@ class CourseController {
         const course = new Course(req.body);
         course
             .save()
-            .then(() => res.redirect('/me/stored/courses'))
+            .then(() => {
+                redis.del('storedCourses');
+                res.redirect('/me/stored/courses');
+            })
             .catch((error) => {
                 console.log('Error saving course:', error);
                 res.status(500).send('Internal Server Error');
